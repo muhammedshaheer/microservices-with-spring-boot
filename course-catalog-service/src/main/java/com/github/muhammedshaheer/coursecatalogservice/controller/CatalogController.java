@@ -1,6 +1,7 @@
 package com.github.muhammedshaheer.coursecatalogservice.controller;
 
 import com.github.muhammedshaheer.coursecatalogservice.entity.Course;
+import com.github.muhammedshaheer.coursecatalogservice.entity.User;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -57,7 +58,13 @@ public class CatalogController {
 
         RestTemplate restTemplate = new RestTemplate();
         Course course = restTemplate.getForObject(courseAppURL, Course.class);
-        return ("Our first course is " + course.getCourseName());
+
+        instanceInfo = client.getNextServerFromEureka("user-service", false);
+        String userAppURL = instanceInfo.getHomePageUrl();
+        userAppURL = userAppURL + "/course/" + course.getCourseId();
+
+        String user = restTemplate.getForObject(userAppURL, String.class);
+        return ("Our first course is " + course.getCourseName() + " and enrolled users are " + user);
     }
 
     private String defaultHome() {
