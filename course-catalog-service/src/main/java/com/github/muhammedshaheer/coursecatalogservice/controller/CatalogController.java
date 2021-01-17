@@ -1,7 +1,6 @@
 package com.github.muhammedshaheer.coursecatalogservice.controller;
 
 import com.github.muhammedshaheer.coursecatalogservice.entity.Course;
-import com.github.muhammedshaheer.coursecatalogservice.entity.User;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -20,10 +19,12 @@ public class CatalogController {
 
     private final EurekaClient client;
     private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+    private final RestTemplate restTemplate;
 
-    public CatalogController(EurekaClient client, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+    public CatalogController(EurekaClient client, CircuitBreakerFactory<?, ?> circuitBreakerFactory, RestTemplate restTemplate) {
         this.client = client;
         this.circuitBreakerFactory = circuitBreakerFactory;
+        this.restTemplate = restTemplate;
     }
 
     @GetMapping("/")
@@ -33,9 +34,8 @@ public class CatalogController {
             InstanceInfo instanceInfo = client.getNextServerFromEureka("course-service", false);
             String courseAppURL = instanceInfo.getHomePageUrl();
 
-            RestTemplate restTemplate = new RestTemplate();
             String courseAppMessage = restTemplate.getForObject(courseAppURL, String.class);
-            return ("Welcome to Course Catalog Service: " + courseAppMessage);
+            return "Welcome to Course Catalog Service: " + courseAppMessage;
         }, throwable -> defaultHome());
     }
 
@@ -45,9 +45,8 @@ public class CatalogController {
         String courseAppURL = instanceInfo.getHomePageUrl();
         courseAppURL = courseAppURL + "/courses";
 
-        RestTemplate restTemplate = new RestTemplate();
         String courses = restTemplate.getForObject(courseAppURL, String.class);
-        return ("Our courses are " + courses);
+        return "Our courses are " + courses;
     }
 
     @GetMapping("/firstcourse")
@@ -56,7 +55,6 @@ public class CatalogController {
         String courseAppURL = instanceInfo.getHomePageUrl();
         courseAppURL = courseAppURL + "/1";
 
-        RestTemplate restTemplate = new RestTemplate();
         Course course = restTemplate.getForObject(courseAppURL, Course.class);
 
         instanceInfo = client.getNextServerFromEureka("user-service", false);
@@ -64,7 +62,7 @@ public class CatalogController {
         userAppURL = userAppURL + "/course/" + course.getCourseId();
 
         String user = restTemplate.getForObject(userAppURL, String.class);
-        return ("Our first course is " + course.getCourseName() + " and enrolled users are " + user);
+        return "Our first course is " + course.getCourseName() + " and enrolled users are " + user;
     }
 
     private String defaultHome() {
