@@ -2,6 +2,7 @@ package com.github.muhammedshaheer.userservice.controller;
 
 import com.github.muhammedshaheer.userservice.entity.User;
 import com.github.muhammedshaheer.userservice.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,8 +23,13 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+
+//    @Value("${user-service.message}")
+//    private String userServiceMessage;
+
     @GetMapping("/")
     public List<User> getUser() {
+//        System.out.println(userServiceMessage);
         return userRepository.findAll();
     }
 
