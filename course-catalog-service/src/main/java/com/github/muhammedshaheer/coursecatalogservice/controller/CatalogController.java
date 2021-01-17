@@ -19,12 +19,10 @@ public class CatalogController {
 
     private final EurekaClient client;
     private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
-    private final RestTemplate restTemplate;
 
-    public CatalogController(EurekaClient client, CircuitBreakerFactory<?, ?> circuitBreakerFactory, RestTemplate restTemplate) {
+    public CatalogController(EurekaClient client, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
         this.client = client;
         this.circuitBreakerFactory = circuitBreakerFactory;
-        this.restTemplate = restTemplate;
     }
 
     @GetMapping("/")
@@ -34,6 +32,7 @@ public class CatalogController {
             InstanceInfo instanceInfo = client.getNextServerFromEureka("course-service", false);
             String courseAppURL = instanceInfo.getHomePageUrl();
 
+            RestTemplate restTemplate = new RestTemplate();
             String courseAppMessage = restTemplate.getForObject(courseAppURL, String.class);
             return "Welcome to Course Catalog Service: " + courseAppMessage;
         }, throwable -> defaultHome());
@@ -45,6 +44,7 @@ public class CatalogController {
         String courseAppURL = instanceInfo.getHomePageUrl();
         courseAppURL = courseAppURL + "/courses";
 
+        RestTemplate restTemplate = new RestTemplate();
         String courses = restTemplate.getForObject(courseAppURL, String.class);
         return "Our courses are " + courses;
     }
@@ -55,6 +55,7 @@ public class CatalogController {
         String courseAppURL = instanceInfo.getHomePageUrl();
         courseAppURL = courseAppURL + "/1";
 
+        RestTemplate restTemplate = new RestTemplate();
         Course course = restTemplate.getForObject(courseAppURL, Course.class);
 
         instanceInfo = client.getNextServerFromEureka("user-service", false);
